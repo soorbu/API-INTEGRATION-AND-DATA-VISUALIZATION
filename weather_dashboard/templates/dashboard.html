@@ -1,0 +1,1036 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --accent-color: #3498db;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --border-radius: 20px;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+            margin: 0 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px 12px 50px;
+            border: 2px solid #e1e8ed;
+            border-radius: 25px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .search-result {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+        }
+
+        .search-result:hover {
+            background: #f8f9fa;
+        }
+
+        .search-result:last-child {
+            border-bottom: none;
+        }
+
+        /* Main Dashboard */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Current Weather Section */
+        .current-weather {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .location-header {
+            margin-bottom: 2rem;
+        }
+
+        .city-name {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .current-time {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+
+        }
+
+        .main-weather {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 3rem;
+            margin: 2rem 0;
+        }
+
+        .temp-display {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .temp-value {
+            font-size: 4rem;
+            font-weight: 300;
+            color: var(--accent-color);
+        }
+
+        .temp-unit {
+            font-size: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .weather-icon-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .weather-icon {
+            width: 100px;
+            height: 100px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+        }
+
+        .condition-text {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        /* Weather Cards Grid */
+
+        .weather-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(2, auto);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            max-width: 1200px;
+            /* Optional: limit max width for better centering */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .weather-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .weather-card:nth-child(1) {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        /* Temperature Details */
+        .weather-card:nth-child(2) {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        /* Humidity & Comfort */
+        .weather-card:nth-child(3) {
+            grid-column: 3;
+            grid-row: 1;
+        }
+
+        /* Wind Conditions */
+        .weather-card:nth-child(4) {
+            grid-column: 4;
+            grid-row: 1;
+        }
+
+        /* UV & Visibility */
+
+        /* Second row - center the last 2 cards */
+        .weather-card:nth-child(5) {
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+        /* Atmospheric Pressure */
+        .weather-card:nth-child(6) {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        /* Sun & Moon Info */
+
+        .weather-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-content {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+
+
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-container canvas {
+            max-height: 100%;
+        }
+
+        /* Color Scheme for Cards */
+        .temp-card .card-icon {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        }
+
+        .humidity-card .card-icon {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+        }
+
+        .wind-card .card-icon {
+            background: linear-gradient(135deg, #45b7d1, #96c93d);
+        }
+
+        .uv-card .card-icon {
+            background: linear-gradient(135deg, #ffa726, #ff7043);
+        }
+
+        .pressure-card .card-icon {
+            background: linear-gradient(135deg, #ab47bc, #8e24aa);
+        }
+
+        .visibility-card .card-icon {
+            background: linear-gradient(135deg, #26c6da, #00acc1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .search-container {
+                margin: 0;
+                max-width: 100%;
+            }
+
+            .dashboard-container {
+                padding: 0 1rem;
+            }
+
+            .city-name {
+                font-size: 2rem;
+            }
+
+            .main-weather {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .temp-value {
+                font-size: 3rem;
+            }
+
+            .weather-cards {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(6, auto);
+            }
+
+            .weather-card:nth-child(1) {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            .weather-card:nth-child(2) {
+                grid-column: 1;
+                grid-row: 2;
+            }
+
+            .weather-card:nth-child(3) {
+                grid-column: 1;
+                grid-row: 3;
+            }
+
+            .weather-card:nth-child(4) {
+                grid-column: 1;
+                grid-row: 4;
+            }
+
+            .weather-card:nth-child(5) {
+                grid-column: 1;
+                grid-row: 5;
+            }
+
+            .weather-card:nth-child(6) {
+                grid-column: 1;
+                grid-row: 6;
+            }
+
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline-info {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sun-arc {
+                width: 250px;
+                height: 125px;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .weather-cards {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(3, auto);
+            }
+
+            .weather-card:nth-child(1) {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            .weather-card:nth-child(2) {
+                grid-column: 2;
+                grid-row: 1;
+            }
+
+            .weather-card:nth-child(3) {
+                grid-column: 1;
+                grid-row: 2;
+            }
+
+            .weather-card:nth-child(4) {
+                grid-column: 2;
+                grid-row: 2;
+            }
+
+            .weather-card:nth-child(5) {
+                grid-column: 1;
+                grid-row: 3;
+            }
+
+            .weather-card:nth-child(6) {
+                grid-column: 2;
+                grid-row: 3;
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-cloud-sun"></i>
+                <span>WeatherDash</span>
+            </div>
+
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search for a city..." id="citySearch">
+                <div class="search-results" id="searchResults"></div>
+            </div>
+
+            <div class="nav-actions">
+                <i class="fas fa-map-marker-alt" style="color: var(--accent-color);"></i>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <!-- Loading Indicator -->
+        <div class="loading" id="loadingIndicator">
+            <div class="spinner"></div>
+            <p>Loading weather data...</p>
+        </div>
+
+        <!-- Current Weather -->
+        <div class="current-weather">
+            <div class="location-header">
+                <h1 class="city-name">{{ weather_data.location.name }}, {{ weather_data.location.region }}</h1>
+                <p class="current-time" id="currentTime">{{ weather_data.location.localtime|date:"F d, Y H:i" }}</p>
+            </div>
+
+            <div class="main-weather">
+                <div class="temp-display">
+                    <span class="temp-value">{{ weather_data.current.temp_c }}</span>
+                    <span class="temp-unit">°C</span>
+                </div>
+
+                <div class="weather-icon-container">
+                    <img src="https:{{ weather_data.current.condition.icon }}"
+                        alt="{{ weather_data.current.condition.text }}" class="weather-icon">
+                    <span class="condition-text">{{ weather_data.current.condition.text }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weather Cards -->
+        <div class="weather-cards">
+            <div class="weather-card temp-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-thermometer-half"></i>
+                    </div>
+                    <h3 class="card-title">Temperature Details</h3>
+                </div>
+                <div class="card-content">
+                    <div class="detail-row">
+                        <span class="detail-label">Feels Like</span>
+                        <span class="detail-value">{{ weather_data.current.feelslike_c }}°C</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Heat Index</span>
+                        <span class="detail-value">{{ weather_data.current.heatindex_c|default:"N/A" }}°C</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Dew Point</span>
+                        <span class="detail-value">{{ weather_data.current.dewpoint_c|default:"N/A" }}°C</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="weather-card humidity-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <h3 class="card-title">Humidity & Comfort</h3>
+                </div>
+                <div class="card-content">
+                    <div class="detail-row">
+                        <span class="detail-label">Humidity</span>
+                        <span class="detail-value">{{ weather_data.current.humidity }}%</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Cloud Cover</span>
+                        <span class="detail-value">{{ weather_data.current.cloud }}%</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Precipitation</span>
+                        <span class="detail-value">{{ weather_data.current.precip_mm }} mm</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="weather-card wind-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-wind"></i>
+                    </div>
+                    <h3 class="card-title">Wind Conditions</h3>
+                </div>
+                <div class="card-content">
+                    <div class="detail-row">
+                        <span class="detail-label">Wind Speed</span>
+                        <span class="detail-value">{{ weather_data.current.wind_kph }} km/h</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Wind Direction</span>
+                        <span class="detail-value">{{ weather_data.current.wind_dir }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Wind Degree</span>
+                        <span class="detail-value">{{ weather_data.current.wind_degree }}°</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="weather-card uv-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-sun"></i>
+                    </div>
+                    <h3 class="card-title">UV & Visibility</h3>
+                </div>
+                <div class="card-content">
+                    <div class="detail-row">
+                        <span class="detail-label">UV Index</span>
+                        <span class="detail-value">{{ weather_data.current.uv }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Visibility</span>
+                        <span class="detail-value">{{ weather_data.current.vis_km }} km</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Gust Speed</span>
+                        <span class="detail-value">{{ weather_data.current.gust_kph|default:"0" }} km/h</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="weather-card pressure-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h3 class="card-title">Atmospheric Pressure</h3>
+                </div>
+                <div class="card-content">
+                    <div class="detail-row">
+                        <span class="detail-label">Pressure</span>
+                        <span class="detail-value">{{ weather_data.current.pressure_mb }} mb</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Pressure (inHg)</span>
+                        <span class="detail-value">{{ weather_data.current.pressure_in }} in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="weather-card visibility-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-moon"></i>
+                    </div>
+                    <h3 class="card-title">Sun & Moon Info</h3>
+                </div>
+                <div class="card-content">
+                    <div class="detail-row">
+                        <span class="detail-label">Sunrise</span>
+                        <span class="detail-value">{{ weather_data.forecast.forecastday.0.astro.sunrise }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Sunset</span>
+                        <span class="detail-value">{{ weather_data.forecast.forecastday.0.astro.sunset }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Moon Phase</span>
+                        <span class="detail-value">{{ weather_data.forecast.forecastday.0.astro.moon_phase }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3 class="chart-title">24-Hour Temperature Trend</h3>
+                <div class="chart-container">
+                    <canvas id="tempChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3 class="chart-title">5-Day Forecast</h3>
+                <div class="chart-container">
+                    <canvas id="forecastChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3 class="chart-title">Humidity & Pressure</h3>
+                <div class="chart-container">
+                    <canvas id="humidityChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3 class="chart-title">Air Quality Trends</h3>
+                <div class="chart-container">
+                    <canvas id="aqChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Search functionality triggers a browser refresh to load the new location page
+        let searchTimeout;
+        const searchInput = document.getElementById('citySearch');
+        const searchResults = document.getElementById('searchResults');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        searchInput.addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                searchLocations(query);
+            }, 300);
+        });
+
+        // This function uses the response from search_locations to get the selected location by user
+        async function searchLocations(query) {
+            try {
+                const response = await fetch(`/api/search-locations/?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                displaySearchResults(data.results || []);
+            } catch (error) {
+                console.error('Search error:', error);
+            }
+        }
+
+        function displaySearchResults(results) {
+            if (results.length === 0) {
+                searchResults.style.display = 'none';
+                return;
+            }
+
+            searchResults.innerHTML = results.map(location =>
+                `<div class="search-result" onclick="selectLocation('${location.name}, ${location.region}, ${location.country}')">
+                    <strong>${location.name}</strong>, ${location.region}, ${location.country}
+                </div>`
+            ).join('');
+
+            searchResults.style.display = 'block';
+        }
+
+        function selectLocation(location) {
+            searchInput.value = location;
+            searchResults.style.display = 'none';
+            loadingIndicator.style.display = 'block';
+            window.location.href = `/?location=${encodeURIComponent(location)}`;
+        }
+
+        // Close search results when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.search-container')) {
+                searchResults.style.display = 'none';
+            }
+        });
+
+
+        const locationTimezone = '{{ location_timezone|default:"UTC" }}';
+        const initialLocalTime = '{{ location_local_time }}';
+
+        function updateCurrentTime() {
+            try {
+                // Create a new date object for the location's timezone
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true,
+                    timeZone: locationTimezone
+                });
+
+                const currentTimeElement = document.getElementById('currentTime');
+                if (currentTimeElement) {
+                    // Update only the time part, keep the date
+                    const currentText = currentTimeElement.textContent;
+                    const datePart = currentText.split(' ').slice(0, 3).join(' '); // "June 12, 2025"
+                    currentTimeElement.textContent = `${datePart} ${timeStr}`;
+                }
+            } catch (error) {
+                console.warn('Timezone not supported, falling back to initial time');
+                // Fallback: don't update time if timezone is not supported
+            }
+        }
+
+        // Initialize with location time
+        updateCurrentTime();
+
+        // Update every minute with location time
+        setInterval(() => {
+            updateCurrentTime();
+        }, 60000);
+
+        // Chart creation functions
+        function createChart(id, config) {
+            const el = document.getElementById(id);
+            if (el) {
+                return new Chart(el.getContext('2d'), config);
+            }
+        }
+
+        // Chart configurations with improved styling
+        const chartDefaults = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                }
+            },
+            elements: {
+                line: {
+                    tension: 0.4
+                },
+                point: {
+                    radius: 4,
+                    hoverRadius: 6
+                }
+            }
+        };
+
+        // Initialize charts
+        createChart('tempChart', {
+            type: 'line',
+            data: {
+                labels: {{ hourly_labels| safe }},
+            datasets: [{
+                label: 'Temperature (°C)',
+                data: {{ hourly_temps| safe }},
+            borderColor: '#ff6b6b',
+            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+            fill: true,
+            tension: 0.4
+                }, {
+                label: 'Feels Like (°C)',
+                data: {{ hourly_feels_like| safe }},
+            borderColor: '#ffa726',
+            backgroundColor: 'rgba(255, 167, 38, 0.1)',
+            fill: false,
+            tension: 0.4
+                }]
+            },
+            options: {
+            ...chartDefaults,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                }
+            }
+        }
+        });
+
+        createChart('forecastChart', {
+            type: 'line',
+            data: {
+                labels: {{ forecast_dates| safe }},
+            datasets: [{
+                label: 'Max Temp (°C)',
+                data: {{ forecast_max_temps| safe }},
+            borderColor: '#e57373',
+            backgroundColor: 'rgba(229, 115, 115, 0.1)',
+            fill: false
+                }, {
+                label: 'Min Temp (°C)',
+                data: {{ forecast_min_temps| safe }},
+            borderColor: '#64b5f6',
+            backgroundColor: 'rgba(100, 181, 246, 0.1)',
+            fill: false
+                }, {
+                label: 'Avg Temp (°C)',
+                data: {{ forecast_avg_temps| safe }},
+            borderColor: '#81c784',
+            backgroundColor: 'rgba(129, 199, 132, 0.1)',
+            fill: '+1'
+                }]
+            },
+            options: chartDefaults
+        });
+
+        createChart('humidityChart', {
+            type: 'line',
+            data: {
+                labels: {{ hourly_labels| safe }},
+            datasets: [{
+                label: 'Humidity (%)',
+                data: {{ hourly_humidity| safe }},
+            borderColor: '#42a5f5',
+            backgroundColor: 'rgba(66, 165, 245, 0.1)',
+            yAxisID: 'y',
+            fill: true
+                }, {
+                label: 'Pressure (mb)',
+                data: {{ hourly_pressure| safe }},
+            borderColor: '#ab47bc',
+            backgroundColor: 'rgba(171, 71, 188, 0.1)',
+            yAxisID: 'y1',
+            fill: false
+                }]
+            },
+            options: {
+            ...chartDefaults,
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Humidity (%)'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Pressure (mb)'
+                    },
+                    grid: {
+                        drawOnChartArea: false
+                    }
+                }
+            }
+        }
+        });
+
+        createChart('aqChart', {
+            type: 'line',
+            data: {
+                labels: {{ hourly_labels| safe }},
+            datasets: [{
+                label: 'PM2.5 (μg/m³)',
+                data: {{ hourly_pm25| safe }},
+            borderColor: '#ff7043',
+            backgroundColor: 'rgba(255, 112, 67, 0.1)',
+            fill: true
+                }, {
+                label: 'NO2 (μg/m³)',
+                data: {{ hourly_no2| safe }},
+            borderColor: '#5c6bc0',
+            backgroundColor: 'rgba(92, 107, 192, 0.1)',
+            fill: false
+                }, {
+                label: 'O3 (μg/m³)',
+                data: {{ hourly_o3| safe }},
+            borderColor: '#26a69a',
+            backgroundColor: 'rgba(38, 166, 154, 0.1)',
+            fill: false
+                }]
+            },
+            options: {
+            ...chartDefaults,
+            scales: {
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Concentration (μg/m³)'
+                    }
+                }
+            }
+        }
+        });
+
+        // Hide loading indicator when page loads
+        window.addEventListener('load', function () {
+            loadingIndicator.style.display = 'none';
+        });
+    </script>
+</body>
+
+</html>
