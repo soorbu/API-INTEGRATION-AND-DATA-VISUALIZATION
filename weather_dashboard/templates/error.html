@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard - Error</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --error-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --accent-color: #3498db;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --border-radius: 20px;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: var(--text-primary);
+        }
+
+        .error-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        .error-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            background: var(--error-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 20px rgba(255, 107, 107, 0);
+            }
+        }
+
+        .error-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--error-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .error-message {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .error-details {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .error-details h4 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .error-details p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-primary);
+            border: 2px solid #e1e8ed;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .suggestions {
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+        .suggestions h4 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .suggestion-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .suggestion-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .suggestion-list li:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .suggestion-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .back-link {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .weather-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            opacity: 0.6;
+            animation: float 20s infinite linear;
+        }
+
+        .cloud:before,
+        .cloud:after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+        }
+
+        .cloud1 {
+            width: 80px;
+            height: 40px;
+            top: 20%;
+            animation-duration: 25s;
+        }
+
+        .cloud1:before {
+            width: 50px;
+            height: 50px;
+            top: -25px;
+            left: 10px;
+        }
+
+        .cloud1:after {
+            width: 60px;
+            height: 40px;
+            top: -15px;
+            right: 10px;
+        }
+
+        .cloud2 {
+            width: 60px;
+            height: 30px;
+            top: 60%;
+            animation-duration: 30s;
+            animation-delay: -10s;
+        }
+
+        .cloud2:before {
+            width: 40px;
+            height: 40px;
+            top: -20px;
+            left: 8px;
+        }
+
+        .cloud2:after {
+            width: 50px;
+            height: 30px;
+            top: -10px;
+            right: 8px;
+        }
+
+        @keyframes float {
+            0% {
+                left: -100px;
+            }
+            100% {
+                left: calc(100% + 100px);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .error-container {
+                padding: 2rem;
+            }
+
+            .error-title {
+                font-size: 2rem;
+            }
+
+            .error-message {
+                font-size: 1.1rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .error-icon {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
+            }
+
+            .error-title {
+                font-size: 1.75rem;
+            }
+
+            .error-container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="weather-animation">
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+    </div>
+
+    <div class="error-container">
+        <div class="error-icon">
+            <i class="fas fa-cloud-rain"></i>
+        </div>
+
+        <h1 class="error-title">Oops! Weather Unavailable</h1>
+        
+        <p class="error-message">
+            We're having trouble fetching the weather data right now. 
+            Don't worry, this is usually temporary!
+        </p>
+
+        {% if error %}
+        <div class="error-details">
+            <h4><i class="fas fa-exclamation-triangle"></i> Error Details:</h4>
+            <p>{{ error }}</p>
+        </div>
+        {% endif %}
+
+        <div class="suggestions">
+            <h4>Here's what you can try:</h4>
+            <ul class="suggestion-list">
+                <li>
+                    <div class="suggestion-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <div class="suggestion-text">
+                        Refresh the page - sometimes it's just a temporary glitch
+                    </div>
+                </li>
+                <li>
+                    <div class="suggestion-icon">
+                        <i class="fas fa-wifi"></i>
+                    </div>
+                    <div class="suggestion-text">
+                        Check your internet connection
+                    </div>
+                </li>
+                <li>
+                    <div class="suggestion-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="suggestion-text">
+                        Try searching for a different city or location
+                    </div>
+                </li>
+                <li>
+                    <div class="suggestion-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="suggestion-text">
+                        Wait a few moments and try again
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="action-buttons">
+            <a href="javascript:location.reload()" class="btn btn-primary">
+                <i class="fas fa-redo"></i>
+                Try Again
+            </a>
+            <a href="/" class="btn btn-secondary">
+                <i class="fas fa-home"></i>
+                Go Home
+            </a>
+        </div>
+
+        <div class="back-link">
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                <i class="fas fa-info-circle"></i>
+                If this problem persists, our weather service might be temporarily down. Please try again later.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Auto-retry functionality
+        let retryCount = 0;
+        const maxRetries = 3;
+        const retryDelay = 5000; // 5 seconds
+
+        function autoRetry() {
+            if (retryCount < maxRetries) {
+                retryCount++;
+                console.log(`Auto-retry attempt ${retryCount} of ${maxRetries}`);
+                
+                // Add visual feedback
+                const tryAgainBtn = document.querySelector('.btn-primary');
+                if (tryAgainBtn) {
+                    const originalText = tryAgainBtn.innerHTML;
+                    tryAgainBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Retrying...';
+                    tryAgainBtn.style.pointerEvents = 'none';
+                    
+                    setTimeout(() => {
+                        // Try to fetch weather data again
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const location = urlParams.get('location') || 'London';
+                        window.location.href = `/?location=${encodeURIComponent(location)}`;
+                    }, 1000);
+                }
+            }
+        }
+
+        // Start auto-retry after 5 seconds if this is the first attempt
+        if (!sessionStorage.getItem('weatherRetryAttempted')) {
+            sessionStorage.setItem('weatherRetryAttempted', 'true');
+            setTimeout(autoRetry, retryDelay);
+        }
+
+        // Add some interactivity to the clouds
+        document.addEventListener('mousemove', function(e) {
+            const clouds = document.querySelectorAll('.cloud');
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+            
+            clouds.forEach((cloud, index) => {
+                const speed = (index + 1) * 0.5;
+                const x = mouseX * speed;
+                const y = mouseY * speed;
+                
+                cloud.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        });
+
+        // Clear retry session storage when user manually navigates
+        window.addEventListener('beforeunload', function() {
+            sessionStorage.removeItem('weatherRetryAttempted');
+        });
+    </script>
+</body>
+</html>
