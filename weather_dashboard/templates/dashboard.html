@@ -344,11 +344,24 @@
 
         .chart-container {
             position: relative;
-            height: 300px;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .chart-container canvas {
-            max-height: 100%;
+        .chart-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-placeholder {
+            color: var(--text-secondary);
+            font-style: italic;
+            text-align: center;
+            padding: 2rem;
         }
 
         /* Color Scheme for Cards */
@@ -524,7 +537,6 @@
             }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
 
 <body>
@@ -718,30 +730,65 @@
             <div class="chart-card">
                 <h3 class="chart-title">24-Hour Temperature Trend</h3>
                 <div class="chart-container">
-                    <canvas id="tempChart"></canvas>
+                    {% if chart_images.temp_chart %}
+                        <img src="data:image/png;base64,{{ chart_images.temp_chart }}" 
+                             alt="24-Hour Temperature Trend" 
+                             class="chart-image">
+                    {% else %}
+                        <div class="chart-placeholder">Chart not available</div>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="chart-card">
                 <h3 class="chart-title">5-Day Forecast</h3>
                 <div class="chart-container">
-                    <canvas id="forecastChart"></canvas>
+                    {% if chart_images.forecast_chart %}
+                        <img src="data:image/png;base64,{{ chart_images.forecast_chart }}" 
+                             alt="5-Day Forecast" 
+                             class="chart-image">
+                    {% else %}
+                        <div class="chart-placeholder">Chart not available</div>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="chart-card">
                 <h3 class="chart-title">Humidity & Pressure</h3>
                 <div class="chart-container">
-                    <canvas id="humidityChart"></canvas>
+                    {% if chart_images.humidity_chart %}
+                        <img src="data:image/png;base64,{{ chart_images.humidity_chart }}" 
+                             alt="Humidity & Pressure Trends" 
+                             class="chart-image">
+                    {% else %}
+                        <div class="chart-placeholder">Chart not available</div>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="chart-card">
                 <h3 class="chart-title">Air Quality Trends</h3>
                 <div class="chart-container">
-                    <canvas id="aqChart"></canvas>
+                    {% if chart_images.aq_chart %}
+                        <img src="data:image/png;base64,{{ chart_images.aq_chart }}" 
+                             alt="Air Quality Trends" 
+                             class="chart-image">
+                    {% else %}
+                        <div class="chart-placeholder">Chart not available</div>
+                    {% endif %}
                 </div>
             </div>
+
+            {% if chart_images.conditions_chart %}
+            <div class="chart-card">
+                <h3 class="chart-title">Weather Conditions Distribution</h3>
+                <div class="chart-container">
+                    <img src="data:image/png;base64,{{ chart_images.conditions_chart }}" 
+                         alt="Weather Conditions Distribution" 
+                         class="chart-image">
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -807,7 +854,6 @@
             }
         });
 
-
         const locationTimezone = '{{ location_timezone|default:"UTC" }}';
         const initialLocalTime = '{{ location_local_time }}';
 
@@ -842,189 +888,6 @@
         setInterval(() => {
             updateCurrentTime();
         }, 60000);
-
-        // Chart creation functions
-        function createChart(id, config) {
-            const el = document.getElementById(id);
-            if (el) {
-                return new Chart(el.getContext('2d'), config);
-            }
-        }
-
-        // Chart configurations with improved styling
-        const chartDefaults = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 20
-                    }
-                }
-            },
-            elements: {
-                line: {
-                    tension: 0.4
-                },
-                point: {
-                    radius: 4,
-                    hoverRadius: 6
-                }
-            }
-        };
-
-        // Initialize charts
-        createChart('tempChart', {
-            type: 'line',
-            data: {
-                labels: {{ hourly_labels| safe }},
-            datasets: [{
-                label: 'Temperature (°C)',
-                data: {{ hourly_temps| safe }},
-            borderColor: '#ff6b6b',
-            backgroundColor: 'rgba(255, 107, 107, 0.1)',
-            fill: true,
-            tension: 0.4
-                }, {
-                label: 'Feels Like (°C)',
-                data: {{ hourly_feels_like| safe }},
-            borderColor: '#ffa726',
-            backgroundColor: 'rgba(255, 167, 38, 0.1)',
-            fill: false,
-            tension: 0.4
-                }]
-            },
-            options: {
-            ...chartDefaults,
-            scales: {
-                y: {
-                    beginAtZero: false,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.1)'
-                    }
-                },
-                x: {
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.1)'
-                    }
-                }
-            }
-        }
-        });
-
-        createChart('forecastChart', {
-            type: 'line',
-            data: {
-                labels: {{ forecast_dates| safe }},
-            datasets: [{
-                label: 'Max Temp (°C)',
-                data: {{ forecast_max_temps| safe }},
-            borderColor: '#e57373',
-            backgroundColor: 'rgba(229, 115, 115, 0.1)',
-            fill: false
-                }, {
-                label: 'Min Temp (°C)',
-                data: {{ forecast_min_temps| safe }},
-            borderColor: '#64b5f6',
-            backgroundColor: 'rgba(100, 181, 246, 0.1)',
-            fill: false
-                }, {
-                label: 'Avg Temp (°C)',
-                data: {{ forecast_avg_temps| safe }},
-            borderColor: '#81c784',
-            backgroundColor: 'rgba(129, 199, 132, 0.1)',
-            fill: '+1'
-                }]
-            },
-            options: chartDefaults
-        });
-
-        createChart('humidityChart', {
-            type: 'line',
-            data: {
-                labels: {{ hourly_labels| safe }},
-            datasets: [{
-                label: 'Humidity (%)',
-                data: {{ hourly_humidity| safe }},
-            borderColor: '#42a5f5',
-            backgroundColor: 'rgba(66, 165, 245, 0.1)',
-            yAxisID: 'y',
-            fill: true
-                }, {
-                label: 'Pressure (mb)',
-                data: {{ hourly_pressure| safe }},
-            borderColor: '#ab47bc',
-            backgroundColor: 'rgba(171, 71, 188, 0.1)',
-            yAxisID: 'y1',
-            fill: false
-                }]
-            },
-            options: {
-            ...chartDefaults,
-            scales: {
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Humidity (%)'
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: 'Pressure (mb)'
-                    },
-                    grid: {
-                        drawOnChartArea: false
-                    }
-                }
-            }
-        }
-        });
-
-        createChart('aqChart', {
-            type: 'line',
-            data: {
-                labels: {{ hourly_labels| safe }},
-            datasets: [{
-                label: 'PM2.5 (μg/m³)',
-                data: {{ hourly_pm25| safe }},
-            borderColor: '#ff7043',
-            backgroundColor: 'rgba(255, 112, 67, 0.1)',
-            fill: true
-                }, {
-                label: 'NO2 (μg/m³)',
-                data: {{ hourly_no2| safe }},
-            borderColor: '#5c6bc0',
-            backgroundColor: 'rgba(92, 107, 192, 0.1)',
-            fill: false
-                }, {
-                label: 'O3 (μg/m³)',
-                data: {{ hourly_o3| safe }},
-            borderColor: '#26a69a',
-            backgroundColor: 'rgba(38, 166, 154, 0.1)',
-            fill: false
-                }]
-            },
-            options: {
-            ...chartDefaults,
-            scales: {
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Concentration (μg/m³)'
-                    }
-                }
-            }
-        }
-        });
 
         // Hide loading indicator when page loads
         window.addEventListener('load', function () {
