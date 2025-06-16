@@ -34,7 +34,7 @@ This is a Django-based Weather Dashboard that fetches and visualizes current wea
 ![Image](https://github.com/user-attachments/assets/50a12356-62d7-4f9d-88b2-aeafa43fdd28)
 ![Image](https://github.com/user-attachments/assets/fb8b1654-30b2-41d2-be8d-e355b4b58b4a)
 ![Image](https://github.com/user-attachments/assets/634eb28b-4996-4494-ae75-40a1dc54a814)
-
+![Image](https://github.com/user-attachments/assets/28b79f7a-5a1d-45b0-bba9-91d1c21dbb6a)
 
 ##  Project Structure
 
